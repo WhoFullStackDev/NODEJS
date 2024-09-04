@@ -4,9 +4,10 @@ var url = "mongodb://localhost:27017";
 MongoClient.connect(url, function (err, db) {
   if (err) throw err;
   var dbo = db.db("mydb");
-  dbo.collection("customers").findOne({}, function (err, result) {
+  var myquery = { address: "Mountain 21" };
+  dbo.collection("customers").deleteOne(myquery, function (err, obj) {
     if (err) throw err;
-    console.log(result.name);
+    console.log("1 document deleted");
     db.close();
   });
 });
