@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DASH Video Player</title>
+    <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
+  </head>
+  <body>
+    <h1>DASH Video Player</h1>
+    <div>
+      <video id="videoPlayer" data-dashjs-player autoplay controls>
+        <source src="/output_dash/output.mpd" type="application/dash+xml" />
+        Your browser does not support the video tag.
+      </video>
+    </div>
+
+    <button onclick="setResolution('360')">360p</button>
+    <button onclick="setResolution('720')">720p</button>
+    <button onclick="setResolution('1080')">1080p</button>
+
+    <script>
+      var player = dashjs.MediaPlayer().create();
+      player.initialize(
+        document.querySelector("#videoPlayer"),
+        "/output_dash/output.mpd",
+        true
+      );
+
+      function setResolution(resolution) {
+        var metrics = player.getBitrateInfoListFor("video");
+        var representationId = null;
+
+        metrics.forEach(function (metric) {
+          var representation = metric.find(function (rep) {
+            return rep.width === parseInt(resolution);
+          });
+          if (representation) {
+            representationId = representation.id;
+          }
+        });
+
+        if (representationId) {
+          player.updateSettings({
+            streaming: {
+              abr: {
+                bandwidthFactor: 0,
+                bandwidthUp: 0,
+                bandwidthDown: 0,
+              },
+            },
+          });
+          player.setQualityFor("video", representationId);
+        } else {
+          console.error("Resolution not found");
+        }
+      }
+    </script>
+  </body>
+</html>
